@@ -30,23 +30,37 @@ def get_activities(
     - difficulty: Filter activities by difficulty level (e.g., 'Beginner', 'Intermediate', 'Advanced', or 'All' for activities without difficulty)
     """
     # Build the query based on provided filters
-    query = {}
+    query_conditions = []
     
     if day:
-        query["schedule_details.days"] = {"$in": [day]}
+        query_conditions.append({"schedule_details.days": {"$in": [day]}})
     
     if start_time:
-        query["schedule_details.start_time"] = {"$gte": start_time}
+        query_conditions.append({"schedule_details.start_time": {"$gte": start_time}})
     
     if end_time:
-        query["schedule_details.end_time"] = {"$lte": end_time}
+        query_conditions.append({"schedule_details.end_time": {"$lte": end_time}})
     
     if difficulty:
         if difficulty == "All":
-            # "All" means activities with no difficulty specified
-            query["difficulty"] = {"$exists": False}
+            # "All" means ONLY activities with no difficulty specified
+            query_conditions.append({"difficulty": {"$exists": False}})
         else:
-            query["difficulty"] = difficulty
+            # For specific difficulty levels, include both:
+            # 1. Activities with that difficulty
+            # 2. Activities with no difficulty (available for all levels)
+            query_conditions.append({
+                "$or": [
+                    {"difficulty": difficulty},
+                    {"difficulty": {"$exists": False}}
+                ]
+            })
+    
+    # Combine all conditions with $and if there are multiple
+    if query_conditions:
+        query = {"$and": query_conditions} if len(query_conditions) > 1 else query_conditions[0]
+    else:
+        query = {}
     
     # Query the database
     activities = {}
