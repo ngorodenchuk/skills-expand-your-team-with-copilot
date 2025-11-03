@@ -554,14 +554,14 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="social-share-container">
         <span class="share-label">Share:</span>
-        <button class="share-button share-facebook" data-activity="${name}" title="Share on Facebook">
-          <span class="share-icon">📘</span>
+        <button class="share-button share-facebook" data-activity="${name}" title="Share on Facebook" aria-label="Share ${name} on Facebook">
+          <span class="share-icon" aria-hidden="true">📘</span>
         </button>
-        <button class="share-button share-twitter" data-activity="${name}" title="Share on Twitter">
-          <span class="share-icon">🐦</span>
+        <button class="share-button share-twitter" data-activity="${name}" title="Share on Twitter" aria-label="Share ${name} on Twitter">
+          <span class="share-icon" aria-hidden="true">🐦</span>
         </button>
-        <button class="share-button share-email" data-activity="${name}" title="Share via Email">
-          <span class="share-icon">✉️</span>
+        <button class="share-button share-email" data-activity="${name}" title="Share via Email" aria-label="Share ${name} via Email">
+          <span class="share-icon" aria-hidden="true">✉️</span>
         </button>
       </div>
       <div class="activity-card-actions">
@@ -845,7 +845,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const schedule = formatSchedule(details);
     const spotsLeft = details.max_participants - details.participants.length;
 
+    // Truncate description for Twitter to fit character limits
+    const maxDescLength = 100;
+    const truncatedDesc = details.description.length > maxDescLength 
+      ? details.description.substring(0, maxDescLength) + "..." 
+      : details.description;
+
     const shareText = `Check out ${activityName} at Mergington High School! ${details.description}`;
+    const twitterShareText = `Join ${activityName} at Mergington High School! ${truncatedDesc}`;
     const shareTitle = `Join ${activityName} - Mergington High School Activities`;
     const shareBody = `I found this interesting activity at Mergington High School:\n\n${activityName} (${typeInfo.label})\n${details.description}\n\nSchedule: ${schedule}\nSpots available: ${spotsLeft} out of ${details.max_participants}\n\nLearn more at: ${shareUrl}`;
 
@@ -854,13 +861,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
         shareUrl
       )}&quote=${encodeURIComponent(shareText)}`;
-      window.open(facebookUrl, "_blank", "width=600,height=400");
+      window.open(facebookUrl, "_blank", "width=600,height=400,noopener,noreferrer");
     } else if (shareType === "twitter") {
       // Twitter Share
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareText
+        twitterShareText
       )}&url=${encodeURIComponent(shareUrl)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
+      window.open(twitterUrl, "_blank", "width=600,height=400,noopener,noreferrer");
     } else if (shareType === "email") {
       // Email Share
       const mailtoUrl = `mailto:?subject=${encodeURIComponent(
