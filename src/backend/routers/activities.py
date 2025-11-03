@@ -18,26 +18,49 @@ router = APIRouter(
 def get_activities(
     day: Optional[str] = None,
     start_time: Optional[str] = None,
-    end_time: Optional[str] = None
+    end_time: Optional[str] = None,
+    difficulty: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Get all activities with their details, with optional filtering by day and time
+    Get all activities with their details, with optional filtering by day, time, and difficulty
     
     - day: Filter activities occurring on this day (e.g., 'Monday', 'Tuesday')
     - start_time: Filter activities starting at or after this time (24-hour format, e.g., '14:30')
     - end_time: Filter activities ending at or before this time (24-hour format, e.g., '17:00')
+    - difficulty: Filter activities by difficulty level (e.g., 'Beginner', 'Intermediate', 'Advanced', or 'Unspecified' for activities without difficulty)
     """
     # Build the query based on provided filters
-    query = {}
+    query_conditions = []
     
     if day:
-        query["schedule_details.days"] = {"$in": [day]}
+        query_conditions.append({"schedule_details.days": {"$in": [day]}})
     
     if start_time:
-        query["schedule_details.start_time"] = {"$gte": start_time}
+        query_conditions.append({"schedule_details.start_time": {"$gte": start_time}})
     
     if end_time:
-        query["schedule_details.end_time"] = {"$lte": end_time}
+        query_conditions.append({"schedule_details.end_time": {"$lte": end_time}})
+    
+    if difficulty:
+        if difficulty == "Unspecified":
+            # "Unspecified" means ONLY activities with no difficulty specified
+            query_conditions.append({"difficulty": {"$exists": False}})
+        else:
+            # For specific difficulty levels, include both:
+            # 1. Activities with that difficulty
+            # 2. Activities with no difficulty (available for all levels)
+            query_conditions.append({
+                "$or": [
+                    {"difficulty": difficulty},
+                    {"difficulty": {"$exists": False}}
+                ]
+            })
+    
+    # Combine all conditions with $and if there are multiple
+    if query_conditions:
+        query = {"$and": query_conditions} if len(query_conditions) > 1 else query_conditions[0]
+    else:
+        query = {}
     
     # Query the database
     activities = {}
