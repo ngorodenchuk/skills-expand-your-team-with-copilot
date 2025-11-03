@@ -863,36 +863,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Dark Mode Toggle Functionality
   const darkModeToggle = document.getElementById("dark-mode-toggle");
-  const themeIcon = darkModeToggle.querySelector(".theme-icon");
+  
+  if (darkModeToggle) {
+    const themeIcon = darkModeToggle.querySelector(".theme-icon");
 
-  // Check for saved dark mode preference
-  function initializeDarkMode() {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.body.classList.add("dark-mode");
-      themeIcon.textContent = "☀️";
-    } else {
-      themeIcon.textContent = "🌙";
+    // Check for saved dark mode preference
+    function initializeDarkMode() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+        themeIcon.textContent = "☀️";
+      } else {
+        themeIcon.textContent = "🌙";
+      }
     }
+
+    // Toggle dark mode
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      const isDarkMode = document.body.classList.contains("dark-mode");
+      
+      // Update icon
+      themeIcon.textContent = isDarkMode ? "☀️" : "🌙";
+      
+      // Save preference
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    }
+
+    // Event listener for dark mode toggle
+    darkModeToggle.addEventListener("click", toggleDarkMode);
+
+    // Initialize dark mode on page load
+    initializeDarkMode();
   }
-
-  // Toggle dark mode
-  function toggleDarkMode() {
-    document.body.classList.toggle("dark-mode");
-    const isDarkMode = document.body.classList.contains("dark-mode");
-    
-    // Update icon
-    themeIcon.textContent = isDarkMode ? "☀️" : "🌙";
-    
-    // Save preference
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  }
-
-  // Event listener for dark mode toggle
-  darkModeToggle.addEventListener("click", toggleDarkMode);
-
-  // Initialize dark mode on page load
-  initializeDarkMode();
 
   // Initialize app
   checkAuthentication();
